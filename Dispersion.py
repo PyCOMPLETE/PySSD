@@ -31,10 +31,10 @@ class Dispersion:
 
 
 class RealDispersion(Dispersion):
-    def __call__(self,jx,jy):
-        return self.getValue(jx,jy).real
+    def __call__(self, jx, jy):
+        return self.getValue(jx, jy).real
 
 
 class ImaginaryDispersion(Dispersion):
-    def __call__(self,jx,jy):
-        return self.getValue(jx,jy).imag
+    def __call__(self, jx, jy):
+        return self.getValue(jx, jy).imag

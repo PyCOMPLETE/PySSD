@@ -1,5 +1,6 @@
-import numpy as np
 import csv, time
+import numpy as np
+from scipy.interpolate import griddata
 
 
 def getStringRep(data,nAmpl,nAngl):
@@ -52,30 +53,31 @@ class Footprint:
     #name,amplitudeCount,angleCount,<tunex;tuney>,<...;...>,...,angleCount,...
     #TODO make robust
     def __init__(self,stringRep,dSigma=1.0):
-        self._dSigma = dSigma;
-        self._tunes = []; #tunes[nampl][nangl]['H'/'V']
-        self._nampl = 0;
-        self._maxnangl = 0;
-        self._name = 'noName';
-        items = stringRep.strip().split(',');
-        self._name = items[0];
-        self._nampl = int(items[1]);
-        current = 2;
+        self._dSigma = dSigma
+        self._tunes = [] #tunes[nampl][nangl]['H'/'V']
+        self._nampl = 0
+        self._maxnangl = 0
+        self._name = 'noName'
+        items = stringRep.strip().split(',')
+        # print items
+        self._name = items[0]
+        self._nampl = int(items[1])
+        current = 2
         for i in np.arange(self._nampl):
-            self._tunes.append([]);
-            nangl = int(items[current]);
+            self._tunes.append([])
+            nangl = int(items[current])
             if nangl > self._maxnangl:
-                self._maxnangl = nangl;
-            current = current + 1;
+                self._maxnangl = nangl
+            current = current + 1
             for j in np.arange(nangl):
-                self._tunes[i].append([]);
-                tunesString = items[current].lstrip('<').rstrip('>').split(';');
-                tunes = {};
+                self._tunes[i].append([])
+                tunesString = items[current].lstrip('<').rstrip('>').split(';')
+                tunes = {}
                 #print tunesString
-                tunes['H'] = float(tunesString[0]);
-                tunes['V'] = float(tunesString[1]);
-                self._tunes[i][j] = tunes;
-                current = current + 1;
+                tunes['H'] = float(tunesString[0])
+                tunes['V'] = float(tunesString[1])
+                self._tunes[i][j] = tunes
+                current = current + 1
 
     def getName(self):
         return self._name;
@@ -207,7 +209,7 @@ class Footprint:
             #    self.draw(fig,lines)
         return lines;
 
-    def getIntermediateTunes(self,ampl,angl):
+    def getIntermediateTunes(self, ampl, angl):
         if angl > np.pi/2.0:
             print 'ERROR angle ',angl,' is larger than pi/2';
         ampl0 = int(ampl/self._dSigma);
@@ -231,17 +233,46 @@ class Footprint:
             tuneY = (self.getVTune(ampl0,angl0)*(1.0-d1)*(1.0-d2) + self.getVTune(ampl0+1,angl0)*d1*(1.0-d2) + self.getVTune(ampl0,angl0+1)*d2*(1.0-d1) + self.getVTune(ampl0+1,angl0+1)*d1*d2);
         return [tuneX,tuneY];
 
-    def getTunesForAmpl(self, qx, qy):
+    def _getTunesForAmpl(self, qx, qy):
 
         ampl = np.sqrt(qx**2 + qy**2)
 
-        if qx == 0.0:
-            angl = np.pi/2
-        else:
-            angl = np.arctan(qy/qx)
-        # angl[np.isnan(angl)] = np.pi/2
+        # if qx == 0.0:
+        #     angl = np.pi/2
+        # else:
+        angl = np.arctan(qy/qx)
+        angl[np.isnan(angl)] = np.pi/2
 
         return self.getIntermediateTunes(ampl, angl)
+
+    def getTunesForAmpl(self, sx, sy):
+
+        # Base as from MAD-X
+        n_amp   = self.getNbAmpl()
+        n_ang   = self.getNbAngl()
+        d_sigma = self._dSigma
+
+        a  = np.arange(0., n_amp*d_sigma, d_sigma) + d_sigma
+        p  = np.arange(0., np.pi/2, np.pi/2/n_ang) - np.pi/2/n_ang
+        aa, pp = np.meshgrid(a, p)
+        aa, pp = aa.T, pp.T
+        x = aa * np.cos(pp)
+        y = aa * np.sin(pp)
+        x = x.flatten()
+        y = y.flatten()
+
+        qx = [g['H'] for g in f for f in self._tunes[1:]]
+        qy = [g['V'] for g in f for f in self._tunes[1:]]
+
+        xi, yi = sx, sy
+
+        points = np.array([x, y]).T
+        pi     = np.array([xi, yi]).T
+
+        qxi    = griddata(points, qx, pi)
+        qyi    = griddata(points, qy, pi)
+
+        return qxi, qyi
 
     #
     #WARNING use with extreme care, this meant for a very specific type of footprint
