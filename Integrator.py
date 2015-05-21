@@ -71,7 +71,11 @@ class SimpsonIntegrator(Integrator):
 
     def integrate(self, Q, epsilon=1e-6):
 
-        dd = Dispersion(self.distribution, self.detuning, Q, epsilon=epsilon).getValue(self.JX, self.JY)
+        # dd = Dispersion(self.distribution, self.detuning, Q, epsilon=epsilon).getValue(self.JX, self.JY)
+        dd = np.array([[
+            Dispersion(self.distribution, self.detuning, Q, epsilon=epsilon).getValue(x, y)
+            for y in self.jy] for x in self.jx])
+
         return -1./simps(simps(dd, self.jx), self.jy)
 
 
