@@ -64,7 +64,7 @@ class SimpsonIntegrator(Integrator):
 
         super(SimpsonIntegrator, self).__init__(*args, **kwargs)
 
-        if 'n_steps' not in kwargs: kwargs['n_steps'] = 1000
+        if 'n_steps' not in kwargs: kwargs['n_steps'] = 2000
         self.jx = np.linspace(self.minJx, self.maxJx, kwargs['n_steps'])
         self.jy = np.linspace(self.minJy, self.maxJy, kwargs['n_steps'])
         self.JX, self.JY = np.meshgrid(self.jx, self.jy)
@@ -98,7 +98,7 @@ class TrapzIntegrator(Integrator):
 
 class FixedTrapezoidalIntegrator(Integrator):
 
-    def __init__(self, distribution=None, detuning=None, minJ=0, maxJ=18, nStep=1000):
+    def __init__(self, distribution=None, detuning=None, minJ=0, maxJ=18, nStep=2000):
         self._distribution = distribution
         self._detuning = detuning
         self._minJx = minJ

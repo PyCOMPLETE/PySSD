@@ -36,4 +36,5 @@ class FootprintDetuning(Detuning):
 
         sigx = np.sqrt(2.0*jx)
         sigy = np.sqrt(2.0*jy)
+
         return self._footprint._getTunesForAmpl(sigx, sigy)[self._plane]

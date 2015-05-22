@@ -318,12 +318,16 @@ class Footprint:
         # Make regular sampling over 6**2/2/3 = 6 sigma
         xi = sx**2/2/3
         yi = sy**2/2/3
+        xi = sx
+        yi = sy
 
         points = np.array([x, y]).T
         pi     = np.array([xi, yi]).T
 
-        qxi    = griddata(points, qx, pi, fill_value=0)
-        qyi    = griddata(points, qy, pi, fill_value=0)
+        qxi    = griddata(points, qx, pi)
+        qyi    = griddata(points, qy, pi)
+        qxi    = griddata(points, qx, pi, fill_value=0.)
+        qyi    = griddata(points, qy, pi, fill_value=0.)
 
         '''
         import matplotlib.pyplot as plt
@@ -345,7 +349,7 @@ class Footprint:
         '''
         # print qxi
 
-        return qxi, qyi
+        return qxi.T, qyi.T
 
     #
     #WARNING use with extreme care, this meant for a very specific type of footprint
