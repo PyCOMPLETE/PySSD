@@ -1,5 +1,6 @@
 from __future__ import division
 
+import warnings
 import numpy as np
 from scipy.integrate import dblquad, simps
 
@@ -25,13 +26,13 @@ class Integrator(object):
 
 
 class Boundary:
-    _boundary = 0.0;
+    _boundary = 0.0
 
-    def __init__(self,boundary):
-        self._boundary = boundary;
+    def __init__(self, boundary):
+        self._boundary = boundary
 
-    def __call__(self,x):
-        return self._boundary;
+    def __call__(self, x):
+        return self._boundary
 
 
 class DblquadIntegrator(Integrator):
@@ -50,10 +51,12 @@ class DblquadIntegrator(Integrator):
         rDispersion = RealDispersion(self.distribution, self.detuning, Q)
         iDispersion = ImaginaryDispersion(self.distribution, self.detuning, Q)
 
-        realPart, realErr = dblquad(rDispersion, self.minJx, self.maxJx,
-                                                 self.minJy, self.maxJy)
-        imagPart, imagErr = dblquad(iDispersion, self.minJx, self.maxJx,
-                                                 self.minJy, self.maxJy)
+        realPart, realErr = dblquad(rDispersion,
+                                    self.minJx, self.maxJx,
+                                    self.minJy, self.maxJy)
+        imagPart, imagErr = dblquad(iDispersion,
+                                    self.minJx, self.maxJx,
+                                    self.minJy, self.maxJy)
 
         return -1.0/complex(realPart, imagPart)
 
@@ -64,14 +67,24 @@ class SimpsonIntegrator(Integrator):
 
         super(SimpsonIntegrator, self).__init__(*args, **kwargs)
 
-        if 'n_steps' not in kwargs: kwargs['n_steps'] = 1000
-        self.jx = np.linspace(self.minJx, self.maxJx, kwargs['n_steps'])
-        self.jy = np.linspace(self.minJy, self.maxJy, kwargs['n_steps'])
+        if 'n_steps' not in kwargs:
+            kwargs['n_steps'] = 1000
+        n_steps = kwargs['n_steps']
+        self.jx = np.linspace(self.minJx, self.maxJx, n_steps)
+        self.jy = np.linspace(self.minJy, self.maxJy, n_steps)
         self.JX, self.JY = np.meshgrid(self.jx, self.jy)
 
     def integrate(self, Q, epsilon=1e-6):
 
-        dd = Dispersion(self.distribution, self.detuning, Q, epsilon=epsilon).getValue(self.JX, self.JY)
+        dd = Dispersion(
+            self.distribution, self.detuning, Q, epsilon=epsilon
+        ).getValue(self.JX, self.JY)
+        # dd = np.array([[
+        #     Dispersion(
+        #         self.distribution, self.detuning, Q, epsilon=epsilon
+        #     ).getValue(x, y)
+        #     for y in self.jy] for x in self.jx])
+
         return -1./simps(simps(dd, self.jx), self.jy)
 
 
@@ -81,20 +94,33 @@ class TrapzIntegrator(Integrator):
 
         super(TrapzIntegrator, self).__init__(*args, **kwargs)
 
-        if 'n_steps' not in kwargs: kwargs['n_steps'] = 1000
-        self.jx = np.linspace(self.minJx, self.maxJx, kwargs['n_steps'])
-        self.jy = np.linspace(self.minJy, self.maxJy, kwargs['n_steps'])
+        if 'n_steps' not in kwargs:
+            kwargs['n_steps'] = 1000
+        n_steps = 1000
+        self.jx = np.linspace(self.minJx, self.maxJx, n_steps)
+        self.jy = np.linspace(self.minJy, self.maxJy, n_steps)
         self.JX, self.JY = np.meshgrid(self.jx, self.jy)
 
     def integrate(self, Q, epsilon=1e-6):
 
-        dd = Dispersion(self.distribution, self.detuning, Q, epsilon=epsilon).getValue(self.JX, self.JY)
+        dd = Dispersion(
+            self.distribution, self.detuning, Q, epsilon=epsilon
+        ).getValue(self.JX, self.JY)
+
         return -1./np.trapz(np.trapz(dd, self.jx), self.jy)
 
 
 class FixedTrapezoidalIntegrator(Integrator):
 
-    def __init__(self, distribution=None, detuning=None, minJ=0, maxJ=18, nStep=1000):
+    def __init__(self, distribution=None, detuning=None,
+                 minJ=0, maxJ=18, nStep=2000):
+        warnings.simplefilter('always', DeprecationWarning)
+        warnings.warn('Class "{:s}" '.format(self.__name__) +
+                      'is deprecated and will be replaced in the ' +
+                      'near future.',
+                      category=DeprecationWarning, stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning)
+
         self._distribution = distribution
         self._detuning = detuning
         self._minJx = minJ
@@ -154,7 +180,14 @@ class AdaptiveRectangularIntegrator(Integrator):
     _arrayY = None;
 
 
-    def __init__(self,distribution,detuning,minJ=0.0,maxJ=18.0):
+    def __init__(self, distribution, detuning, minJ=0.0, maxJ=18.0):
+        warnings.simplefilter('always', DeprecationWarning)
+        warnings.warn('Class "{:s}" '.format(self.__name__) +
+                      'is deprecated and will be replaced in the ' +
+                      'near future.',
+                      category=DeprecationWarning, stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning)
+
         self._distribution = distribution;
         self._detuning = detuning;
         self._minJx = minJ;

@@ -3,11 +3,12 @@ from __future__ import division
 import sys, time
 import numpy as np
 import matplotlib.pyplot as plt
+plt.switch_backend('TkAgg')
 
 from PySSD.Distribution import BiGaussian
 from PySSD.Detuning import LinearDetuning
 from PySSD.Dispersion import Dispersion
-from PySSD.Integrator import FixedTrapezoidalIntegrator, SimpsonIntegrator
+from PySSD.Integrator import FixedTrapezoidalIntegrator, SimpsonIntegrator, TrapzIntegrator
 
 # from PySSD.Detunign import FootprintDetuning
 # from PySSD.Footprint import Footprint, parseDynapTune
@@ -62,8 +63,9 @@ detuning = LinearDetuning(0.31, a, b)
 maxJ = 18
 Qs = findQs(detuning, stepSize=2e-5, maxJ=maxJ)
 
-# integrator = FixedTrapezoidalIntegrator(distribution, detuning, maxJ=maxJ)
+integrator = FixedTrapezoidalIntegrator(distribution, detuning, maxJ=maxJ)
 integrator = SimpsonIntegrator(distribution, detuning, maxJ=maxJ)
+integrator = TrapzIntegrator(distribution, detuning, maxJ=maxJ)
 
 tuneShifts = []
 outputFileName = './Test.sdiag';

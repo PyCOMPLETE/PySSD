@@ -1,5 +1,6 @@
-import numpy as np
 import csv, time
+import numpy as np
+from scipy.interpolate import griddata
 
 
 def getStringRep(data,nAmpl,nAngl):
@@ -52,30 +53,31 @@ class Footprint:
     #name,amplitudeCount,angleCount,<tunex;tuney>,<...;...>,...,angleCount,...
     #TODO make robust
     def __init__(self,stringRep,dSigma=1.0):
-        self._dSigma = dSigma;
-        self._tunes = []; #tunes[nampl][nangl]['H'/'V']
-        self._nampl = 0;
-        self._maxnangl = 0;
-        self._name = 'noName';
-        items = stringRep.strip().split(',');
-        self._name = items[0];
-        self._nampl = int(items[1]);
-        current = 2;
+        self._dSigma = dSigma
+        self._tunes = [] #tunes[nampl][nangl]['H'/'V']
+        self._nampl = 0
+        self._maxnangl = 0
+        self._name = 'noName'
+        items = stringRep.strip().split(',')
+        # print items
+        self._name = items[0]
+        self._nampl = int(items[1])
+        current = 2
         for i in np.arange(self._nampl):
-            self._tunes.append([]);
-            nangl = int(items[current]);
+            self._tunes.append([])
+            nangl = int(items[current])
             if nangl > self._maxnangl:
-                self._maxnangl = nangl;
-            current = current + 1;
+                self._maxnangl = nangl
+            current = current + 1
             for j in np.arange(nangl):
-                self._tunes[i].append([]);
-                tunesString = items[current].lstrip('<').rstrip('>').split(';');
-                tunes = {};
+                self._tunes[i].append([])
+                tunesString = items[current].lstrip('<').rstrip('>').split(';')
+                tunes = {}
                 #print tunesString
-                tunes['H'] = float(tunesString[0]);
-                tunes['V'] = float(tunesString[1]);
-                self._tunes[i][j] = tunes;
-                current = current + 1;
+                tunes['H'] = float(tunesString[0])
+                tunes['V'] = float(tunesString[1])
+                self._tunes[i][j] = tunes
+                current = current + 1
 
     def getName(self):
         return self._name;
@@ -207,7 +209,7 @@ class Footprint:
             #    self.draw(fig,lines)
         return lines;
 
-    def getIntermediateTunes(self,ampl,angl):
+    def getIntermediateTunes(self, ampl, angl):
         if angl > np.pi/2.0:
             print 'ERROR angle ',angl,' is larger than pi/2';
         ampl0 = int(ampl/self._dSigma);
@@ -231,7 +233,7 @@ class Footprint:
             tuneY = (self.getVTune(ampl0,angl0)*(1.0-d1)*(1.0-d2) + self.getVTune(ampl0+1,angl0)*d1*(1.0-d2) + self.getVTune(ampl0,angl0+1)*d2*(1.0-d1) + self.getVTune(ampl0+1,angl0+1)*d1*d2);
         return [tuneX,tuneY];
 
-    def getTunesForAmpl(self, qx, qy):
+    def _getTunesForAmpl(self, qx, qy):
 
         ampl = np.sqrt(qx**2 + qy**2)
 
@@ -242,6 +244,112 @@ class Footprint:
         # angl[np.isnan(angl)] = np.pi/2
 
         return self.getIntermediateTunes(ampl, angl)
+
+    def getTunesForAmpl(self, sx, sy):
+
+        # Base as from MAD-X
+        n_amp   = self.getNbAmpl()-1
+        n_ang   = self.getNbAngl()
+        d_sigma = self._dSigma
+
+        a  = np.arange(0., n_amp*d_sigma, d_sigma) + d_sigma
+        p  = np.arange(0., np.pi/2 + np.pi/2/(n_ang-1), np.pi/2/(n_ang-1)) #- np.pi/2/(n_ang-1)
+        x  = np.zeros(n_amp*n_ang)
+        y  = np.zeros(n_amp*n_ang)
+
+        i=0
+        small = 0.05
+        big   = np.sqrt(1.-small**2)
+        for k, n in enumerate(a):
+            for l, m in enumerate(p):
+                if l==50:
+                    x[i] = n*small
+                    y[i] = n*big
+                elif l==0:
+                    x[i] = n*big
+                    y[i] = n*small
+                else:
+                    x[i] = n*np.cos(m)
+                    y[i] = n*np.sin(m)
+                # x[i] = n*np.cos(m)
+                # y[i] = n*np.sin(m)
+                i += 1
+
+        '''
+        while (n <= nsigmax)
+        {
+          angle = 1.8*m*pi/180;
+          if (m == 0) {xs=n*big; ys=n*small;}
+          elseif (m == 50) {xs=n*small; ys=n*big;}
+          else
+          {
+            xs=n*cos(angle);
+            ys=n*sin(angle);
+          }
+          value,xs,ys;
+          start,fx=xs,fy=ys;
+          m=m+1;
+          if (m == 51) { m=0; n=n+0.1;}
+        };
+        '''
+
+        '''
+        a  = np.arange(0., n_amp*d_sigma, d_sigma) + d_sigma
+        p  = np.arange(0., np.pi/2, np.pi/2/n_ang) - np.pi/2/n_ang
+        aa, pp = np.meshgrid(a, p)
+        aa, pp = aa.T, pp.T
+        x = aa * np.cos(pp)
+        y = aa * np.sin(pp)
+
+        small   = a * 0.05
+        big     = a * np.sqrt(1-small**2)
+        x[:,0]  = big
+        x[:,-1] = small
+        y[:,0]  = small
+        y[:,-1] = big
+
+        x = x.flatten()
+        y = y.flatten()
+        '''
+
+        qx = np.array([g['H'] for f in self._tunes[1:] for g in f])
+        qy = np.array([g['V'] for f in self._tunes[1:] for g in f])
+
+        # Make regular sampling over 6**2/2/3 = 6 sigma
+        xi = sx**2/2/3
+        yi = sy**2/2/3
+        xi = sx
+        yi = sy
+
+        points = np.array([x, y]).T
+        pi     = np.array([xi, yi]).T
+
+        qxi    = griddata(points, qx, pi)
+        qyi    = griddata(points, qy, pi)
+        qxi    = griddata(points, qx, pi, fill_value=0.)
+        qyi    = griddata(points, qy, pi, fill_value=0.)
+
+        '''
+        import matplotlib.pyplot as plt
+
+        plt.close(1)
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 10))
+
+        ax1.scatter(x, y, c=qx, marker='x')
+        ax1.scatter(xi, yi, c=qxi.T, s=40, lw=0)
+
+        # ax2.scatter(x, y, c=qx, marker='x')
+        # ax2.scatter(xi, yi, c=qxi, s=40, lw=0)
+
+        # ax3.scatter(u, v, c=qx, lw=0)
+        # ax3.set_xlim(-1e-3, 4e-3)
+        # ax3.set_ylim(-1e-3, 4e-3)
+
+        plt.show()
+        '''
+        # print qxi
+
+        return qxi.T, qyi.T
 
     #
     #WARNING use with extreme care, this meant for a very specific type of footprint

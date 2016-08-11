@@ -1,4 +1,5 @@
 import numpy as np
+
 from abc import ABCMeta, abstractmethod
 
 
@@ -25,10 +26,10 @@ class BiGaussian(Distribution):
 
     def getValue(self, jx, jy):
         '''Return pdf of normal bi-Gaussian'''
-        return np.exp(-(jx + jy));
+        return np.exp(-(jx + jy))
 
     def getDJx(self, jx, jy):
-        return -self.getValue(jx, jy);
+        return -self.getValue(jx, jy)
 
     def getDJy(self, jx, jy):
-        return -self.getValue(jx, jy);
+        return -self.getValue(jx, jy)
