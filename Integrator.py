@@ -13,7 +13,7 @@ class Integrator(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, distribution, detuning, minJ=0.0, maxJ=18.0):
+    def __init__(self, distribution, detuning, minJ=0.0, maxJ=18.0, **kwargs):
         self.distribution = distribution
         self.detuning = detuning
         self.minJx = minJ
@@ -101,7 +101,7 @@ class TrapzIntegrator(Integrator):
         self.jy = np.linspace(self.minJy, self.maxJy, n_steps)
         self.JX, self.JY = np.meshgrid(self.jx, self.jy)
 
-    def integrate(self, Q, epsilon=1e-6):
+    def integrate(self, Q, epsilon=1e-7):
 
         dd = Dispersion(
             self.distribution, self.detuning, Q, epsilon=epsilon
