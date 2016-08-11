@@ -1,17 +1,17 @@
+from __future__ import division
+
 import numpy as np
 
 
-class Detuning:
-    def __call__(self,jx,jy):
-        raise NotImplemented;
+class Detuning(object):
+
+    def __call__(self, jx, jy):
+        raise NotImplemented
 
 
 class LinearDetuning(Detuning):
-    _startTune = 0.31;
-    _slopex = 0.0;
-    _slopey = 0.0;
 
-    def __init__(self, startTune, slopex, slopey):
+    def __init__(self, startTune=0.31, slopex=0, slopey=0):
         self._startTune = startTune
         self._slopex = slopex
         self._slopey = slopey
@@ -21,11 +21,8 @@ class LinearDetuning(Detuning):
 
 
 class FootprintDetuning(Detuning):
-    _footprint = None;
-    _plane = None;
-
     # 0 for H and 1 for V
-    def __init__(self, footprint, plane=0):
+    def __init__(self, footprint=None, plane=0):
         self._footprint = footprint
         self._plane = plane
 
