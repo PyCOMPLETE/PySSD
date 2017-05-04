@@ -6,7 +6,7 @@ from scipy.integrate import dblquad, simps
 
 from abc import ABCMeta, abstractmethod
 
-from Dispersion import Dispersion, RealDispersion, ImaginaryDispersion
+from PySSD.Dispersion import Dispersion, RealDispersion, ImaginaryDispersion
 
 
 class Integrator(object):
@@ -115,7 +115,7 @@ class FixedTrapezoidalIntegrator(Integrator):
     def __init__(self, distribution=None, detuning=None,
                  minJ=0, maxJ=18, nStep=2000):
         warnings.simplefilter('always', DeprecationWarning)
-        warnings.warn('Class "{:s}" '.format(self.__name__) +
+        warnings.warn('Class FixedTrapezoidalIntegrator' +
                       'is deprecated and will be replaced in the ' +
                       'near future.',
                       category=DeprecationWarning, stacklevel=2)
@@ -220,7 +220,7 @@ class AdaptiveRectangularIntegrator(Integrator):
         for nIter in np.arange(self._maxIter):
             oldStepSize = stepSize;
             stepSize = self._maxSize/(self._basis**(nIter+1)*self._initialSize);
-            print nIter,fValues.nnz;
+            print(nIter,fValues.nnz);
             dx = self._arrayX[stepSize]-self._arrayX[0];
             dy = self._arrayY[stepSize]-self._arrayY[0];
             median = np.median(np.abs(fValues.values()));
@@ -239,6 +239,6 @@ class AdaptiveRectangularIntegrator(Integrator):
         for key in fValues.keys():
             dispersionIntegral += fValues[key]*diffX[key]*diffY[key];
 
-        print 'integral',dispersionIntegral
+        print('integral',dispersionIntegral)
 
         return -1.0/dispersionIntegral;

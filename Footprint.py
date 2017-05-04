@@ -13,7 +13,7 @@ def getStringRep(data,nAmpl,nAngl):
 
 
 def parseDynapTune(fileName,nAmpl,nAngl):
-    reader = csv.reader(open(fileName, 'rb'), delimiter=' ');
+    reader = csv.reader(open(fileName, 'r'), delimiter=' ');
     headers = 0;
     data = {};
     names = [];
@@ -211,10 +211,10 @@ class Footprint:
 
     def getIntermediateTunes(self, ampl, angl):
         if angl > np.pi/2.0:
-            print 'ERROR angle ',angl,' is larger than pi/2';
+            print('ERROR angle ',angl,' is larger than pi/2');
         ampl0 = int(ampl/self._dSigma);
         if ampl0 > self.getNbAmpl():
-            print 'Error, amplitude is too large';
+            print('Error, amplitude is too large');
         tmpAngl = 2.0*(self.getNbAngl()-1)*angl/np.pi;
         angl0 = int(tmpAngl);
         d1 = ampl/self._dSigma - ampl0;
@@ -373,7 +373,7 @@ class Footprint:
                     if not backwards:
                         newAngl = newAngl + 1;
                         if newAngl >= self.getNbAngl():
-                            print "ERROR could not find a non resonant tune at this amplitude, leaving original value";
+                            print("ERROR could not find a non resonant tune at this amplitude, leaving original value");
                             newAngle = angl;
                             break;
                     qx = self.getHTune(ampl,newAngl);

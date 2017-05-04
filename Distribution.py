@@ -22,10 +22,10 @@ class Distribution(object):
         pass
 
 
-class BiGaussian(Distribution):
+class Gaussian(Distribution):
 
     def getValue(self, jx, jy):
-        '''Return pdf of normal bi-Gaussian'''
+        '''Return pdf of normal 2D Gaussian'''
         return np.exp(-(jx + jy))
 
     def getDJx(self, jx, jy):
