@@ -1,0 +1,32 @@
+b_t_dist = 25.e-9;                  !--- bunch distance in [sec]
+b_h_dist = clight * b_t_dist / 2 ;  !--- bunch half-distance in [m]
+ip1_range = 58.;                     ! range for parasitic collisions
+ip5_range = ip1_range;
+ip2_range = 60.;
+ip8_range = ip2_range;
+
+npara_1 = ip1_range / b_h_dist;     ! # parasitic either side
+npara_2 = ip2_range / b_h_dist;
+npara_5 = ip5_range / b_h_dist;
+npara_8 = ip8_range / b_h_dist;
+
+value,npara_1,npara_2,npara_5,npara_8;
+
+ eg   =  7000;
+ bg   =  eg/pmass;
+ en   = 1.7e-06;
+ epsx = en/bg;
+ epsy = en/bg;
+
+Beam, particle = proton, sequence=lhcb1, energy = eg,
+          sigt=      0.076     , 
+          bv = +1, NPART=230000000000.0, sige=      1.1e-4, 
+          ex=epsx,   ey=epsy;
+
+Beam, particle = proton, sequence=lhcb2, energy = eg,
+          sigt=      0.076     , 
+          bv = -1, NPART=230000000000.0, sige=      1.1e-4, 
+          ex=epsx,   ey=epsy;
+
+beamx = beam%lhcb1->ex;   beamy = beam%lhcb1->ey;
+sigz  = beam%lhcb1->sigt; sige = beam%lhcb1->sige;

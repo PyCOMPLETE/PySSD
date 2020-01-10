@@ -1,0 +1,9 @@
+
+
+on_sep1:= 0.0062009997598;on_x1:= 250.0;phi_IR1 := 90; on_sol_atlas:=0;on_crab1:=-250.0;
+on_sep5:= 0.0062009997598;on_x5:= 250.0;phi_IR5 := 0; on_sol_cms :=0;on_crab5:=-250.0;
+on_sep2:= 1.44;on_x2:= -170.0;on_a2=0;on_alice:=1;on_sol_alice:=0;
+on_sep8:= 1.4;on_x8:= -250.0;on_a8=0;on_lhcb :=1;
+on_disp=0;
+
+on_oct := -500.0/550;

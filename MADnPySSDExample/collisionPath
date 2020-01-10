@@ -1,0 +1,22 @@
+!
+!===========================================================
+!   this sets CHARGE in the head-on beam-beam elements. 
+!   set +1 * ho_charge   for parasitic on, 0 for off
+
+ on_ho1  := +1 * ho_charge; ! ho_charge depends on split
+ on_ho2  := +1 * ho_charge; ! because of the "by hand" splitting
+ on_ho5  := +1 * ho_charge;
+ on_ho8  := +1 * ho_charge;
+
+!
+!===========================================================
+!   set CHARGE in the parasitic beam-beam elements. 
+!   set +1 for parasitic on, 0 for off
+ on_lr1l := +1;
+ on_lr1r := +1;
+ on_lr2l := +1;
+ on_lr2r := +1;
+ on_lr5l := +1;
+ on_lr5r := +1;
+ on_lr8l := +1;
+ on_lr8r := +1;
