@@ -10,7 +10,6 @@ class Detuning(object):
 
 
 class LinearDetuning(Detuning):
-
     def __init__(self, startTune=0.31, slopex=0, slopey=0):
         self._startTune = startTune
         self._slopex = slopex
@@ -21,6 +20,13 @@ class LinearDetuning(Detuning):
 
 
 class FootprintDetuning(Detuning):
+    def __init__(self, footprint):
+        self._footprint = footprint
+
+    def __call__(self, jx, jy):
+        return self._footprint.interpolateTunesForAction(jx,jy)
+
+class PolarFootprintDetuning(Detuning):
     # 0 for H and 1 for V
     def __init__(self, footprint=None, plane=0):
         self._footprint = footprint

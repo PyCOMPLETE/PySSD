@@ -24,12 +24,16 @@ class Distribution(object):
 
 class Gaussian(Distribution):
 
+    def __init__(self,emitx=1.0,emity=1.0):
+        self.emitx = emitx
+        self.emity = emity
+
     def getValue(self, jx, jy):
         '''Return pdf of normal 2D Gaussian'''
-        return np.exp(-(jx + jy))
+        return np.exp(-(jx/self.emitx + jy/self.emity))/(self.emitx*self.emity)
 
     def getDJx(self, jx, jy):
-        return -self.getValue(jx, jy)
+        return -self.getValue(jx, jy)/self.emitx
 
     def getDJy(self, jx, jy):
-        return -self.getValue(jx, jy)
+        return -self.getValue(jx, jy)/self.emity
